@@ -33,12 +33,15 @@ library(plotly)
 
 # themes you like = theme_gray() and theme_fivethirtyeight()
 plot1 <- ggplot(google,aes(x=Month.Year,y=Search.for.improv...California.)) +
-  geom_line()
+  geom_line() + 
+  theme_ipsum()
 
 plot2 <- ggplot(marriage, aes(x=Month.Year,y=Should.be.legal))+
-  geom_line()
+  geom_line() + 
+  theme_ipsum()
 
-plot1 + plot2
+side_side <- plot1 + plot2
+side_side
 
 
 # Start with a usual ggplot2 call:
@@ -82,4 +85,5 @@ just_graph <- ggplot(joined_df, aes(x=Month.Year)) +
   theme(plot.title = element_text(size=22)) +
   xlab("Time") 
 
-plotly(just_graph)
+just_graph
+ 
