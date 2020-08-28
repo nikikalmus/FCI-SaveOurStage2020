@@ -66,23 +66,21 @@ just_graph <- ggplot(joined_df, aes(x=Month.Year)) +
   geom_line( aes(y=Search.improv.comedy...United.States.), size=1, color=marriageColor) +
   scale_y_continuous( limits = c(0,100),
     # Features of the first axis
-    name = "Popularity of Googling 'improv comedy' in the USA",
+    name = "Public Approval ofLegalizing Gay Marriage",
     # Add a second axis and specify its features
-    sec.axis = sec_axis(~.*1, name="Public Approval ofLegalizing Gay Marriage")
+    sec.axis = sec_axis(~.*1, name="Popularity of Googling 'improv comedy' in the USA")
   ) + 
+  theme_grey()+
   theme(
     axis.title.y = element_text(color = googleColor, size=16, hjust = 1, margin = margin(t = 0, r = 20, b = 0, l = 0)),
-    axis.ticks.y = element_line(color = googleColor),
     axis.text.y = element_text(color = googleColor, size=12),
-    axis.title.y.right = element_text(color = marriageColor, size=16),
-    axis.ticks.y.right = element_line(color = marriageColor),
+    axis.title.y.right = element_text(color = marriageColor, size=16, hjust = 1, margin = margin(t = 0, r = 0, b = 0, l = 20)),
     axis.text.y.right = element_text(color = marriageColor),
-    axis.title.x = element_text(color = titleColor, size=16),
+    axis.title.x = element_text(color = titleColor, size=16, margin = margin(t = 20, r = 0, b = 0, l = 0)),
     legend.position="bottom"
-    
   ) +
   ggtitle("Improv Search Down, Support Gay Marriage Up") +
-  theme(plot.title = element_text(size=22)) +
+  theme(plot.title = element_text(size=22, margin = margin(t = 0, r = 0, b = 20, l = 0))) +
   xlab("Time") 
 
 just_graph
