@@ -12,10 +12,10 @@ google <- read.csv("Graph1_improvGoogle.csv")
 
 # prepare image packages ================================
 # install.packages("magick")
-library(magick)
-str(magick::magick_config())
-# library(here) # For making the script run without a wd
-library(magrittr) # For piping the logo
+# library(magick)
+# str(magick::magick_config())
+# # library(here) # For making the script run without a wd
+# library(magrittr) # For piping the logo
 
 library(zoo)
 google$Month.Year <- as.Date(as.yearmon(google$Month.Year))
@@ -28,100 +28,120 @@ joined_df <- merge(google, sad, by.x = "Month.Year",
 library(ggplot2)
 library(ggthemes)
 library(patchwork) # To display 2 charts together
-library(hrbrthemes)
-hrbrthemes::import_roboto_condensed()
-hrbrthemes::import_roboto_condensed()
 library(plotly)
-library(here) # For making the script run without a wd
-
-#separate plots: CA
-improvCA <- ggplot(google,aes(x=Month.Year,y=Search.for.improv...California.)) +
-  geom_line() + 
-  theme_ipsum()
-
-sadCA <- ggplot(sad, aes(x=Month.Year,y=why.am.i.so.sad...California.))+
-  geom_line() + 
-  theme_ipsum()
-
-side_sideCA <- improvCA + sadCA
-side_sideCA
-
-# separate plots: USA
-improvUSA <- ggplot(google,aes(x=Month.Year,y=Search.for.improv...United.States.)) +
-  geom_line() + 
-  theme_ipsum()
-
-sadUSA <- ggplot(sad, aes(x=Month.Year,y=why.am.i.so.sad...United.States.))+
-  geom_line() + 
-  theme_ipsum()
-
-side_sideUSA <- improvUSA + sadUSA
-side_sideUSA
+# library(here) # For making the script run without a wd
 
 
 ##########
 # A few constants
-googleColor <- "#69b3a2"
+improvColor <- "#69b3a2"
 sadColor <- rgb(0.2, 0.6, 0.9, 1)
 titleColor <- "#000000"
 
-just_graph <- ggplot(joined_df, aes(x=Month.Year)) +
-  geom_line( aes(y=why.am.i.so.sad...United.States.), size=1, color=googleColor, show.legend = TRUE) + 
+# Correlations:
+cor(joined_df$Search.improv.comedy...United.States.,joined_df$why.am.i.so.sad...United.States.,  method="pearson")
+  # record this for the annotation in the graph below: r = -0.4480436
+
+full_graph <- ggplot(joined_df, aes(x=Month.Year)) +
+  geom_line( aes(y=why.am.i.so.sad...United.States.), size=1, color=improvColor, show.legend = TRUE) + 
   geom_line( aes(y=Search.improv.comedy...United.States.), size=1, color=sadColor) +
   scale_y_continuous( limits = c(0,100),
                       # Features of the first axis
-                      name = "Popularity of Googling 'why am I so sad",
+                      name = "'why am I so sad",
                       # Add a second axis and specify its features
-                      sec.axis = sec_axis(~.*1, name="Popularity of Googling 'improv comedy'")
+                      sec.axis = sec_axis(~.*1, name="'improv comedy'")
   ) + 
   theme_grey()+
   theme(
-    axis.title.y = element_text(color = googleColor, size=16, hjust = 1, margin = margin(t = 0, r = 20, b = 0, l = 0)),
-    axis.text.y = element_text(color = googleColor, size=12),
-    axis.title.y.right = element_text(color = sadColor, size=16, hjust = 1, margin = margin(t = 0, r = 0, b = 0, l = 20)),
+    axis.title.y = element_text(color = improvColor, size=16, margin = margin(t = 0, r = 20, b = 0, l = 0)),
+    axis.text.y = element_text(color = improvColor, size=12),
+    axis.title.y.right = element_text(color = sadColor, size=16, margin = margin(t = 0, r = 0, b = 0, l = 20)),
     axis.text.y.right = element_text(color = sadColor),
     axis.title.x = element_text(color = titleColor, size=16, margin = margin(t = 20, r = 0, b = 0, l = 0)),
     legend.position="bottom"
   ) +
-  ggtitle("Improv Search Down, Support Gay Marriage Up") +
-  theme(plot.title = element_text(size=22, margin = margin(t = 0, r = 0, b = 20, l = 0))) +
-  xlab("Time") 
+  ggtitle("What are people googling?") +
+  theme(plot.title = element_text(size=22, margin = margin(t = 0, r = 0, b = 0, l = 0))) +
+  xlab("Time")+
+  labs(caption = 'Numbers represent search interest relative to the highest point on the chart for the given region and time. 
+       A value of 100 is the peak popularity for the term. A value of 50 means that the term is half as popular. A score of 0 means there was not enough data for this term.') + 
+  annotate("text", x =as.Date("2015-01-01"), y = 63.5, label = "r = -0.4480436")
 
-just_graph
+full_graph 
 
-ggsave("graph1.png",  width = 20, height = 15, units = "cm")
+ggsave("graph1_updateALL.png",  width = 20, height = 15, units = "cm")
 
+## what if we zoom in?
+  # Correlations:
+  cor(past5$Search.improv.comedy...United.States.,past5$why.am.i.so.sad...United.States.,  method="pearson")
+  # record this for the annotation in the graph below: r = -0.3198018
+  
+past5 <- subset(joined_df, Month.Year >='2015-01-01')
 
-
-# Now call back the plot
-background <- image_read(paste0(here("/"), "graph1.png"))
-# And bring in a logo
-logo_raw <- image_read("https://media.giphy.com/media/23lFPv0BmMCz9OzwA1/giphy.gif", density = .5) 
-#logo_raw <- image_read("~/Documents/Improv/SOS/love_is_love.gif")
-#logo_raw <- image_scale(image_scale(logo_raw,"75"),"75")
-
-frames <- lapply(logo_raw, function(frame) {
-  image_composite(background, frame, offset = "+100+50")
-})
-
-animation <- image_animate(image_join(frames))
-
-
-image_write(animation, "~/Documents/Improv/SOS/Graph1.gif")
-
-
-## But let's break it down:
-plot1 <- ggplot(google,aes(x=Month.Year,y=Search.for.improv...California.)) +
-  geom_line() + 
-  theme_ipsum()
-
-plot2 <- ggplot(marriage, aes(x=Month.Year,y=Should.be.legal))+
-  geom_line(size=1, color=googleColor) + 
+past5_graph <- ggplot(past5, aes(x=Month.Year)) +
+  geom_line( aes(y=why.am.i.so.sad...United.States.), size=1, color=improvColor, show.legend = TRUE) + 
+  geom_line( aes(y=Search.improv.comedy...United.States.), size=1, color=sadColor) +
   scale_y_continuous( limits = c(0,100),
                       # Features of the first axis
-                      name = "Public Approval ofLegalizing Gay Marriage")
-+ 
-  theme_ipsum()
+                      name = "'why am I so sad",
+                      # Add a second axis and specify its features
+                      sec.axis = sec_axis(~.*1, name="'improv comedy'")
+  ) + 
+  theme_grey()+
+  theme(
+    axis.title.y = element_text(color = improvColor, size=16, margin = margin(t = 0, r = 20, b = 0, l = 0)),
+    axis.text.y = element_text(color = improvColor, size=12),
+    axis.title.y.right = element_text(color = sadColor, size=16, margin = margin(t = 0, r = 0, b = 0, l = 20)),
+    axis.text.y.right = element_text(color = sadColor),
+    axis.title.x = element_text(color = titleColor, size=16, margin = margin(t = 20, r = 0, b = 0, l = 0)),
+    legend.position="bottom"
+  ) +
+  ggtitle("What are people googling?") +
+  theme(plot.title = element_text(size=22, margin = margin(t = 0, r = 0, b = 20, l = 0))) +
+  xlab("Time")+
+  labs(subtitle = "Zoomed to Past 5 Years",
+       caption = 'Numbers represent search interest relative to the highest point on the chart for the given region and time. 
+       A value of 100 is the peak popularity for the term. A value of 50 means that the term is half as popular. A score of 0 means there was not enough data for this term.') +
+  annotate("text", x =as.Date("2020-01-01"), y = 76, label = "r = -0.3198018")
+
+past5_graph
+
+ggsave("graph1_past5.png",  width = 20, height = 15, units = "cm")
 
 
+## Since 2019?
+  # Correlations:
+  cor(since2019$Search.improv.comedy...United.States.,since2019$why.am.i.so.sad...United.States.,  method="pearson")
+  # record this for the annotation in the graph below: -0.3059874
+  
+since2019 <- subset(joined_df, Month.Year >='2019-01-01')
 
+since2019_graph <- ggplot(since2019, aes(x=Month.Year)) +
+  geom_line( aes(y=why.am.i.so.sad...United.States.), size=1, color=improvColor, show.legend = TRUE) + 
+  geom_line( aes(y=Search.improv.comedy...United.States.), size=1, color=sadColor) +
+  scale_y_continuous( limits = c(0,100),
+                      # Features of the first axis
+                      name = "'why am I so sad",
+                      # Add a second axis and specify its features
+                      sec.axis = sec_axis(~.*1, name="'improv comedy'")
+  ) + 
+  theme_grey()+
+  theme(
+    axis.title.y = element_text(color = improvColor, size=16, margin = margin(t = 0, r = 20, b = 0, l = 0)),
+    axis.text.y = element_text(color = improvColor, size=12),
+    axis.title.y.right = element_text(color = sadColor, size=16, margin = margin(t = 0, r = 0, b = 0, l = 20)),
+    axis.text.y.right = element_text(color = sadColor),
+    axis.title.x = element_text(color = titleColor, size=16, margin = margin(t = 20, r = 0, b = 0, l = 0)),
+    legend.position="bottom"
+  ) +
+  ggtitle("What are people googling?") +
+  theme(plot.title = element_text(size=22, margin = margin(t = 0, r = 0, b = 20, l = 0))) +
+  xlab("Time")+
+  labs(subtitle = "Zoomed to 2019 to Present",
+       caption = 'Numbers represent search interest relative to the highest point on the chart for the given region and time. 
+       A value of 100 is the peak popularity for the term. A value of 50 means that the term is half as popular. A score of 0 means there was not enough data for this term.') +
+  annotate("text", x =as.Date("2020-07-01"), y = 76, label = "r = -0.3059874")
+
+since2019_graph 
+
+ggsave("graph1_since2019.png",  width = 20, height = 15, units = "cm")
