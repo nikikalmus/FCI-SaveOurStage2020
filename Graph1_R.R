@@ -22,7 +22,7 @@ google$Month.Year <- as.Date(as.yearmon(google$Month.Year))
 sad$Month.Year <-as.Date(as.yearmon(sad$Month.Year))
 
 joined_df <- merge(google, sad, by.x = "Month.Year", 
-                   by.y = "Month.Year", all.x = FALSE, all.y = FALSE)
+                   by.y = "Month.Year", all.x = FALSE, all.y = FALSE) #create just one dataframe for the two google search files
 
 
 library(ggplot2)
@@ -145,3 +145,30 @@ since2019_graph <- ggplot(since2019, aes(x=Month.Year)) +
 since2019_graph 
 
 ggsave("graph1_since2019.png",  width = 20, height = 15, units = "cm")
+
+## Teaser (aka misleading graph)
+teaser_graph <- ggplot(since2019, aes(x=Month.Year)) +
+  geom_line( aes(y=why.am.i.so.sad...United.States.), size=1, color=improvColor, show.legend = TRUE) + 
+  geom_line( aes(y=Search.improv.comedy...United.States.), size=1, color=sadColor) +
+  scale_y_continuous( limits = c(0,100),
+                      # Features of the first axis
+                      name = "'why am I so sad",
+                      # Add a second axis and specify its features
+                      sec.axis = sec_axis(~.*1, name="'improv comedy'")
+  ) + 
+  theme_grey()+
+  theme(
+    axis.title.y = element_text(color = improvColor, size=16, margin = margin(t = 0, r = 20, b = 0, l = 0)),
+    axis.text.y = element_text(color = improvColor, size=12),
+    axis.title.y.right = element_text(color = sadColor, size=16, margin = margin(t = 0, r = 0, b = 0, l = 20)),
+    axis.text.y.right = element_text(color = sadColor),
+    axis.title.x = element_text(color = titleColor, size=16, margin = margin(t = 20, r = 0, b = 0, l = 0)),
+    legend.position="bottom"
+  ) +
+  ggtitle("What are people googling?") +
+  theme(plot.title = element_text(size=22, margin = margin(t = 0, r = 0, b = 20, l = 0))) +
+  xlab("Time")
+
+teaser_graph 
+
+ggsave("graph1_FINAL.png",  width = 20, height = 15, units = "cm")
