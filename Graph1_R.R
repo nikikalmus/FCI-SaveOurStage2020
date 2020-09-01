@@ -22,7 +22,7 @@ google$Month.Year <- as.Date(as.yearmon(google$Month.Year))
 sad$Month.Year <-as.Date(as.yearmon(sad$Month.Year))
 
 joined_df <- merge(google, sad, by.x = "Month.Year", 
-                   by.y = "Month.Year", all.x = FALSE, all.y = FALSE) #create just one dataframe for the two google search files
+                   by.y = "Month.Year", all.x = FALSE, all.y = FALSE)
 
 
 library(ggplot2)
@@ -47,7 +47,7 @@ full_graph <- ggplot(joined_df, aes(x=Month.Year)) +
   geom_line( aes(y=Search.improv.comedy...United.States.), size=1, color=sadColor) +
   scale_y_continuous( limits = c(0,100),
                       # Features of the first axis
-                      name = "'why am I so sad",
+                      name = "'why am I so sad?'",
                       # Add a second axis and specify its features
                       sec.axis = sec_axis(~.*1, name="'improv comedy'")
   ) + 
@@ -68,8 +68,36 @@ full_graph <- ggplot(joined_df, aes(x=Month.Year)) +
   annotate("text", x =as.Date("2015-01-01"), y = 63.5, label = "r = -0.4480436")
 
 full_graph 
+ggsave("graph1_updateALL.png",  width = 25, height = 15, units = "cm")
 
-ggsave("graph1_updateALL.png",  width = 20, height = 15, units = "cm")
+# let's smooth over the graphs though because we want to be sneaky!
+fake_graph <- ggplot(joined_df, aes(x=Month.Year)) +
+  geom_smooth( aes(y=why.am.i.so.sad...United.States.), size=1, color=improvColor, show.legend = TRUE) + 
+  geom_smooth( aes(y=Search.improv.comedy...United.States.), size=1, color=sadColor) +
+  scale_y_continuous( limits = c(0,100),
+                      # Features of the first axis
+                      name = "'why am I so sad?'",
+                      # Add a second axis and specify its features
+                      sec.axis = sec_axis(~.*1, name="'improv comedy'")
+  ) + 
+  theme_grey()+
+  theme(
+    axis.title.y = element_text(color = improvColor, size=16, margin = margin(t = 0, r = 20, b = 0, l = 0)),
+    axis.text.y = element_text(color = improvColor, size=12),
+    axis.title.y.right = element_text(color = sadColor, size=16, margin = margin(t = 0, r = 0, b = 0, l = 20)),
+    axis.text.y.right = element_text(color = sadColor),
+    axis.title.x = element_text(color = titleColor, size=16, margin = margin(t = 20, r = 0, b = 0, l = 0)),
+    legend.position="bottom"
+  ) +
+  ggtitle("What are people googling?") +
+  theme(plot.title = element_text(size=22, margin = margin(t = 0, r = 0, b = 0, l = 0))) +
+  xlab("Time") +
+  labs(caption = 'Numbers represent search interest relative to the highest point on the chart for the given region and time. 
+       A value of 100 is the peak popularity for the term. A value of 50 means that the term is half as popular. A score of 0 means there was not enough data for this term.')
+  
+
+fake_graph 
+ggsave("graph1_sneakyALL.png",  width = 25, height = 15, units = "cm")
 
 ## what if we zoom in?
   # Correlations:
@@ -83,7 +111,7 @@ past5_graph <- ggplot(past5, aes(x=Month.Year)) +
   geom_line( aes(y=Search.improv.comedy...United.States.), size=1, color=sadColor) +
   scale_y_continuous( limits = c(0,100),
                       # Features of the first axis
-                      name = "'why am I so sad",
+                      name = "'why am I so sad?'",
                       # Add a second axis and specify its features
                       sec.axis = sec_axis(~.*1, name="'improv comedy'")
   ) + 
@@ -121,7 +149,7 @@ since2019_graph <- ggplot(since2019, aes(x=Month.Year)) +
   geom_line( aes(y=Search.improv.comedy...United.States.), size=1, color=sadColor) +
   scale_y_continuous( limits = c(0,100),
                       # Features of the first axis
-                      name = "'why am I so sad",
+                      name = "'why am I so sad?'",
                       # Add a second axis and specify its features
                       sec.axis = sec_axis(~.*1, name="'improv comedy'")
   ) + 
@@ -152,7 +180,7 @@ teaser_graph <- ggplot(since2019, aes(x=Month.Year)) +
   geom_line( aes(y=Search.improv.comedy...United.States.), size=1, color=sadColor) +
   scale_y_continuous( limits = c(0,100),
                       # Features of the first axis
-                      name = "'why am I so sad",
+                      name = "'why am I so sad?'",
                       # Add a second axis and specify its features
                       sec.axis = sec_axis(~.*1, name="'improv comedy'")
   ) + 
@@ -172,3 +200,4 @@ teaser_graph <- ggplot(since2019, aes(x=Month.Year)) +
 teaser_graph 
 
 ggsave("graph1_FINAL.png",  width = 20, height = 15, units = "cm")
+
